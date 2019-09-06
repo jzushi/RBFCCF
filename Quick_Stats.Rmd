@@ -1,0 +1,357 @@
+---
+title: "RBFCCF Quick Stats"
+author: "Jzushi"
+date: "9/6/2019"
+output: html_document
+---
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# RBFCCF Quick Stats
+
+### Included in this sheet are the variables we tested, brief coding and stats, as well as simple graphs.
+
+
+
+## Fitness Level ~ MARCI
+
+```{r, warning=FALSE, include=FALSE }
+library(tidyverse)
+library(modelr)
+library(ggplot2)
+library(lme4)
+library(emmeans)
+library(tinytex)
+
+
+df <- read.csv("../Sawyer_Research_Data_Analysis/MetaData_exc.csv", stringsAsFactors = FALSE)
+names(df)
+glimpse(df)
+
+# Separate the sex
+MaleT<- grep("^M", df$Sex)
+FemaleT<- grep("^F", df$Sex)
+
+
+# Remove Controls and blanks from group 
+df <- subset(df, Sex != "")
+df <- subset(df, Subject != "NA")
+df <- subset(df, MARCI != "NA")
+df <- subset(df, Fitness_Level != "NA")
+
+
+
+Runs <- subset(df, Group != "Control")
+glimpse(Runs)
+
+# Change categories
+Runs$Fitness_Level <- as.factor(Runs$Fitness_Level)
+Runs$MARCI <- as.numeric(Runs$MARCI)
+
+```
+
+### Quick Plot 
+Fitness Level ~ MARCI
+
+```{r, warning=FALSE }
+MARCIPlot <- ggplot(data = Runs, aes(x = Fitness_Level, y = MARCI)) +
+  geom_bar(stat="identity")
+MARCIPlot
+```
+
+### Modeling
+
+```{r, warning=FALSE }
+RunsMarci = lm(MARCI ~ Fitness_Level, data = Runs)
+summary(RunsMarci)
+``` 
+
+### Checking Validity
+
+```{r, warning=FALSE}
+# Residuals 
+epsMarci <- residuals(RunsMarci) 
+qqnorm(epsMarci) 
+qqline(epsMarci) 
+
+# Homoscedasticity 
+yhatMarci <- fitted(RunsMarci) 
+plot(yhatMarci,epsMarci) 
+abline(h=0) 
+
+```
+
+
+
+
+## Fitness Level ~ Spatial Reasoning
+
+```{r, warning=FALSE, include=FALSE }
+library(tidyverse)
+library(modelr)
+library(ggplot2)
+library(lme4)
+df <- read.csv("../Sawyer_Research_Data_Analysis/MetaData_exc.csv", stringsAsFactors = FALSE)
+names(df)
+glimpse(df)
+
+# Separate the sex
+MaleT<- grep("^M", df$Sex)
+FemaleT<- grep("^F", df$Sex)
+
+
+# Remove Controls and blanks from group 
+df <- subset(df, Sex != "")
+df <- subset(df, Subject != "NA")
+df <- subset(df, Spatial_reasoning_time != "NA")
+## Remove Spatial NA
+Runs <- subset(df, Group != "Control")
+glimpse(Runs)
+
+# Change categories
+Runs$Fitness_Level <- as.factor(Runs$Fitness_Level)
+Runs$Spatial_reasoning_score <- as.numeric(Runs$Spatial_reasoning_score)
+Runs$Spatial_reasoning_time <- as.numeric(Runs$Spatial_reasoning_time)
+```
+
+### Quick Plot 
+Fitness Level ~ Spatial Reasoning Score
+
+```{r, warning=FALSE }
+Spatial_Score_Plot <- ggplot(data = Runs, aes(x = Fitness_Level, y = Spatial_reasoning_score)) +
+  geom_bar(stat="identity")
+Spatial_Score_Plot
+```
+
+Fitness Level ~ Spatial Reasoning Time
+
+```{r, warning=FALSE}
+Spatial_Time_Plot <- ggplot(data = Runs, aes(x = Fitness_Level, y = Spatial_reasoning_time)) +
+  geom_bar(stat="identity")
+Spatial_Time_Plot
+```
+
+### Modeling
+
+```{r, warning=FALSE }
+RunsSpatial = lm(Spatial_reasoning_time + Spatial_reasoning_score ~ Fitness_Level, data = Runs)
+summary(RunsSpatial)
+``` 
+
+### Checking Validity
+
+```{r, warning=FALSE}
+# Residuals 
+epsSpatial <- residuals(RunsSpatial) 
+qqnorm(epsSpatial) 
+qqline(epsSpatial) 
+
+# Homoscedasticity 
+yhatSpatial <- fitted(RunsSpatial) 
+plot(yhatSpatial,epsSpatial) 
+abline(h=0) 
+```
+
+
+## Fitness Level ~ Pre Stroop Tests
+
+```{r, warning=FALSE, include=FALSE }
+library(tidyverse)
+library(modelr)
+library(ggplot2)
+library(lme4)
+df <- read.csv("../Sawyer_Research_Data_Analysis/MetaData_exc.csv", stringsAsFactors = FALSE)
+names(df)
+glimpse(df)
+
+# Separate the sex
+MaleT<- grep("^M", df$Sex)
+FemaleT<- grep("^F", df$Sex)
+
+
+# Remove Controls and blanks from group 
+df <- subset(df, Sex != "")
+df <- subset(df, Subject != "NA")
+Runs <- subset(df, Group != "Control")
+glimpse(Runs)
+
+# Change categories
+Runs$Fitness_Level <- as.factor(Runs$Fitness_Level)
+Runs$Pre_stroop1 <- as.numeric(Runs$Pre_stroop1)
+Runs$Pre_stroop2 <- as.numeric(Runs$Pre_stroop2)
+
+```
+
+### Quick Plot 
+Fitness Level ~ Pre Stroop Condition 1
+
+```{r, warning=FALSE }
+Fit_Pre_Stroop1_Plot <- ggplot(data = Runs, aes(x = Fitness_Level, y = Pre_stroop1)) +
+  geom_bar(stat="identity")
+Fit_Pre_Stroop1_Plot
+```
+
+Fitness Level ~ Pre Stroop Condition 2
+
+```{r, warning=FALSE}
+Fit_Pre_Stroop2_Plot <- ggplot(data = Runs, aes(x = Fitness_Level, y = Pre_stroop2)) +
+  geom_bar(stat="identity")
+Fit_Pre_Stroop2_Plot
+
+```
+
+### Modeling
+
+```{r, warning=FALSE }
+Runs_Pre_Stroop = lm(Pre_stroop1 + Pre_stroop2 ~ Fitness_Level, data = Runs)
+summary(Runs_Pre_Stroop)
+``` 
+
+### Checking Validity
+
+```{r, warning=FALSE}
+# Residuals 
+# Residuals 
+epsPreStroop <- residuals(Runs_Pre_Stroop) 
+qqnorm(epsPreStroop) 
+qqline(epsPreStroop) 
+
+# Homoscedasticity 
+yhatPreStroop <- fitted(Runs_Pre_Stroop) 
+plot(yhatPreStroop,epsPreStroop) 
+abline(h=0) 
+```
+
+## Fitness Level ~ ABC
+
+```{r, warning=FALSE, include=FALSE }
+library(tidyverse)
+library(modelr)
+library(ggplot2)
+library(lme4)
+df <- read.csv("../Sawyer_Research_Data_Analysis/MetaData_exc.csv", stringsAsFactors = FALSE)
+names(df)
+glimpse(df)
+
+# Separate the sex
+MaleT<- grep("^M", df$Sex)
+FemaleT<- grep("^F", df$Sex)
+
+
+# Remove Controls and blanks from group 
+df <- subset(df, Sex != "")
+df <- subset(df, Subject != "NA")
+Runs <- subset(df, Group != "Control")
+glimpse(Runs)
+
+# Change categories
+Runs$Fitness_Level <- as.factor(Runs$Fitness_Level)
+Runs$ABC <- as.numeric(Runs$ABC)
+```
+
+### Quick Plot 
+Fitness Level ~ ABC
+
+```{r, warning=FALSE }
+ABCPlot <- ggplot(data = Runs, aes(x = Fitness_Level, y = ABC)) +
+  geom_bar(stat="identity")
+ABCPlot
+```
+
+### Modeling
+```{r, warning=FALSE }
+RunsABC = lm(ABC ~ Fitness_Level, data = Runs)
+summary(RunsABC)
+``` 
+
+### Checking Validity
+```{r, warning=FALSE}
+# Residuals 
+epsABC <- residuals(RunsABC) 
+qqnorm(epsABC) 
+qqline(epsABC) 
+
+# Homoscedasticity 
+yhatABC <- fitted(RunsABC) 
+plot(yhatABC,epsABC) 
+abline(h=0) 
+```
+
+## Fitness Level ~ ILP
+
+```{r, warning=FALSE, include=FALSE }
+library(tidyverse)
+library(modelr)
+library(ggplot2)
+library(lme4)
+df <- read.csv("../Sawyer_Research_Data_Analysis/MetaData_exc.csv", stringsAsFactors = FALSE)
+names(df)
+glimpse(df)
+
+# Separate the sex
+MaleT<- grep("^M", df$Sex)
+FemaleT<- grep("^F", df$Sex)
+
+
+# Remove Controls and blanks from group 
+df <- subset(df, Sex != "")
+df <- subset(df, Subject != "NA")
+Runs <- subset(df, Group != "Control")
+glimpse(Runs)
+
+# Change categories
+Runs$Fitness_Level <- as.factor(Runs$Fitness_Level)
+Runs$ILP_Speaking <- as.numeric(Runs$ILP_Speaking)
+Runs$ILP_Reading_and_writing <- as.numeric(Runs$ILP_Reading_and_writing)
+Runs$ILP_time_management <- as.numeric(Runs$ILP_time_management)
+```
+
+### Quick Plot 
+Fitness Level ~ ILP Speaking
+
+```{r, warning=FALSE }
+SpeakingPlot <- ggplot(data = Runs, aes(x = Fitness_Level, y = ILP_Speaking)) +
+  geom_bar(stat="identity")
+SpeakingPlot
+
+```
+
+Fitness Level ~ ILP Reading and Writing
+
+```{r, warning=FALSE }
+ReadingPlot <- ggplot(data = Runs, aes(x = Fitness_Level, y = ILP_Reading_and_writing)) +
+  geom_bar(stat="identity")
+ReadingPlot
+```
+
+Fitness Level ~ ILP Time Management
+
+```{r, warning=FALSE }
+ManagementPlot <- ggplot(data = Runs, aes(x = Fitness_Level, y = ILP_time_management)) +
+  geom_bar(stat="identity")
+ManagementPlot
+```
+
+### Modeling
+```{r, warning=FALSE }
+RunsILP = lm(ILP_Speaking + ILP_Reading_and_writing + ILP_time_management ~ Fitness_Level, data = Runs)
+summary(RunsILP)
+``` 
+
+### Checking Validity
+```{r, warning=FALSE}
+# Residuals 
+epsILP <- residuals(RunsILP) 
+qqnorm(epsILP) 
+qqline(epsILP) 
+
+# Homoscedasticity 
+yhatILP <- fitted(RunsILP) 
+plot(yhatILP,epsILP) 
+abline(h=0) 
+```
